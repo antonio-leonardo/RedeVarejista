@@ -1,9 +1,9 @@
 ﻿using Rede.Varejista.Infrastructure;
 
-namespace Rede.Varejista.Repository.CQRS
+namespace Rede.Varejista.Repository.CQRS.Interface
 {
     public interface ICommandRepository<TEntity>
-        where TEntity : EntityBase
+        where TEntity : IEntity //EntityBase
     {
         void Adicionar(TEntity entity);
         void Atualizar(string id, TEntity entity);

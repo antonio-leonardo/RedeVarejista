@@ -1,9 +1,9 @@
 ﻿using Rede.Varejista.Infrastructure;
 
-namespace Rede.Varejista.Repository.CQRS
+namespace Rede.Varejista.Repository.CQRS.Interface
 {
     public interface IQueryRepository<TEntity>
-        where TEntity : EntityBase
+        where TEntity : IEntity //EntityBase
     {
         TEntity Obter(string id);
 

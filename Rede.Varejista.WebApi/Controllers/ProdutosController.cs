@@ -1,87 +1,77 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Rede.Varejista.Domain.Entities;
 using Rede.Varejista.Domain.Services.Facade;
-using Rede.Varejista.Repository;
 
 namespace Rede.Varejista.WebApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ProdutosController : ControllerBase
+    public sealed class ProdutosController : RedeVarejistaControllerBase
     {
-        private readonly ProdutoCommandServiceFacade _produtoCommandServiceFacade;
+        public ProdutosController(CategoriaCommandServiceFacade categoriaCommandServiceFacade, CategoriaQueryServiceFacade categoriaQueryServiceFacade)
+            : base(categoriaCommandServiceFacade, categoriaQueryServiceFacade) { }
 
-        private readonly ProdutoQueryServiceFacade _produtoQueryServiceFacade;
-
-        public ProdutosController(ProdutoCommandServiceFacade produtoCommandServiceFacade, ProdutoQueryServiceFacade produtoQueryServiceFacade)
-        {
-            this._produtoCommandServiceFacade = produtoCommandServiceFacade;
-            this._produtoQueryServiceFacade = produtoQueryServiceFacade; 
-        }
-
-        [HttpGet]
-        public ActionResult<List<Produto>> Get()
+        [HttpGet("{idCategoria:length(24)},{idProduto:length(24)}")]
+        public ActionResult<Produto> Get(string idCategoria, string idProduto)
         {
             try
             {
-                return this._produtoQueryServiceFacade.Listar();
+                return this._categoriaQueryServiceFacade.Obter(idCategoria).Produtos.Where(p => p.Id == idProduto).FirstOrDefault();
             }
             catch
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
-            
+
         }
 
-        [HttpGet("{id:length(24)}")]
-        public ActionResult<Produto> Get(string id)
+        [HttpGet("{idCategoria:length(24)}")]
+        public ActionResult<List<Produto>> Get(string idCategoria)
         {
             try
             {
-                var produto = this._produtoQueryServiceFacade.Obter(id);
+                var produtos = this._categoriaQueryServiceFacade.Obter(idCategoria).Produtos.ToList();
+
+                if (produtos is null)
+                {
+                    return NotFound();
+                }
+
+                return produtos;
+            }
+            catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        [HttpPost("{idCategoria:length(24)}")]
+        public IActionResult Post(string idCategoria, Produto novoProduto)
+        {
+            try
+            {
+                this._categoriaCommandServiceFacade.AdicionarProdutoNumaCategoria(idCategoria, novoProduto);
+                return CreatedAtAction(nameof(Get), new { idCategoria = idCategoria, idProduto = novoProduto.Id }, novoProduto);
+            }
+            catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        [HttpPatch("{idCategoria:length(24)}")]
+        public IActionResult Update(string idCategoria, Produto produtoParaAtualizar)
+        {
+            try
+            {
+                var produto = this._categoriaQueryServiceFacade.Obter(idCategoria).Produtos.Where(p => p.Id == produtoParaAtualizar.Id).FirstOrDefault();
 
                 if (produto is null)
                 {
                     return NotFound();
                 }
 
-                return produto;
-            }
-            catch
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
-        }
-
-        [HttpPost]
-        public IActionResult Post(Produto novaProduto)
-        {
-            try
-            {
-                this._produtoCommandServiceFacade.Adicionar(novaProduto);
-                return CreatedAtAction(nameof(Get), new { id = novaProduto.Id }, novaProduto);
-            }
-            catch
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
-        }
-
-        [HttpPut("{id:length(24)}")]
-        public IActionResult Update(string id, Produto atualizacaoProduto)
-        {
-            try
-            {
-                var produto = this._produtoQueryServiceFacade.Obter(id);
-
-                if (produto is null)
-                {
-                    return NotFound();
-                }
-
-                atualizacaoProduto.Id = produto.Id;
-
-                this._produtoCommandServiceFacade.Atualizar(id, atualizacaoProduto);
+                this._categoriaCommandServiceFacade.AlterarProdutoNumaCategoria(idCategoria, produtoParaAtualizar);
 
                 return NoContent();
             }
@@ -91,19 +81,19 @@ namespace Rede.Varejista.WebApi.Controllers
             }
         }
 
-        [HttpDelete("{id:length(24)}")]
-        public IActionResult Delete(string id)
+        [HttpDelete("{idCategoria:length(24)},{idProduto:length(24)}")]
+        public IActionResult Delete(string idCategoria, string idProduto)
         {
             try
             {
-                var produto = this._produtoQueryServiceFacade.Obter(id);
+                var produto = this._categoriaQueryServiceFacade.Obter(idCategoria).Produtos.Where(x => x.Id == idProduto).FirstOrDefault();
 
                 if (produto is null)
                 {
                     return NotFound();
                 }
 
-                this._produtoQueryServiceFacade.Deletar(id);
+                this._categoriaQueryServiceFacade.DeletarUmProdutoDeUmaCategoria(idCategoria, produto);
 
                 return NoContent();
             }

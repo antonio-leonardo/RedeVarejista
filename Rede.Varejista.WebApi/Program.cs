@@ -1,3 +1,5 @@
+using MongoDB.Bson.Serialization;
+using Rede.Varejista.Domain.Entities;
 using Rede.Varejista.Domain.Services.Facade;
 using Rede.Varejista.Infrastructure;
 
@@ -9,8 +11,18 @@ builder.Services.Configure<DatabaseSettings>(
 
 builder.Services.AddSingleton<CategoriaCommandServiceFacade>();
 builder.Services.AddSingleton<CategoriaQueryServiceFacade>();
-builder.Services.AddSingleton<ProdutoCommandServiceFacade>();
-builder.Services.AddSingleton<ProdutoQueryServiceFacade>();
+//builder.Services.AddSingleton<ProdutoCommandServiceFacade>();
+//builder.Services.AddSingleton<ProdutoQueryServiceFacade>();
+
+BsonClassMap.RegisterClassMap<Categoria>(map =>
+{
+    map.AutoMap();
+    map.SetIgnoreExtraElements(true);
+    BsonClassMap.RegisterClassMap<Produto>(child =>
+    {
+        child.AutoMap();
+    });
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

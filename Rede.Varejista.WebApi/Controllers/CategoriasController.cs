@@ -1,23 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Rede.Varejista.Domain.Entities;
 using Rede.Varejista.Domain.Services.Facade;
-using Rede.Varejista.Repository;
 
 namespace Rede.Varejista.WebApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CategoriasController : ControllerBase
+    public sealed class CategoriasController : RedeVarejistaControllerBase
     {
-        private readonly CategoriaCommandServiceFacade _categoriaCommandServiceFacade;
-
-        private readonly CategoriaQueryServiceFacade _categoriaQueryServiceFacade;
-
         public CategoriasController(CategoriaCommandServiceFacade categoriaCommandServiceFacade, CategoriaQueryServiceFacade categoriaQueryServiceFacade)
-        {
-            this._categoriaCommandServiceFacade = categoriaCommandServiceFacade;
-            this._categoriaQueryServiceFacade = categoriaQueryServiceFacade; 
-        }
+            : base(categoriaCommandServiceFacade, categoriaQueryServiceFacade) { }
 
         [HttpGet]
         public ActionResult<List<Categoria>> Get()

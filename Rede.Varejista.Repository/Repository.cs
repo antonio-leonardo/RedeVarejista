@@ -5,7 +5,7 @@ using Rede.Varejista.Infrastructure;
 namespace Rede.Varejista.Repository
 {
     public class Repository<TEntity>
-        where TEntity : EntityBase
+        where TEntity : IEntity
     {
         protected internal readonly IMongoCollection<TEntity> _entityCollection;
         public Repository(IOptions<DatabaseSettings> databaseSettings)
